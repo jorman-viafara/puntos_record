@@ -24,7 +24,12 @@ jobs:
 
     - name: Descargar el archivo KML
       run: |
-        curl -o puntos_venta_record.kml "https://www.google.com/maps/d/u/0/kml?forcekml=1&mid=1NLx1CntjAmbgd7YzC11IKVSYmOzvaxg"
+        curl -L -o puntos_venta_record.kml "https://www.google.com/maps/d/u/0/kml?forcekml=1&mid=1NLx1CntjAmbgd7YzC11IKVSYmOzvaxg"
+        echo "Código de respuesta HTTP: $?"  # Muestra el código de respuesta HTTP
+
+    - name: Verificar el contenido del archivo KML
+      run: |
+        cat puntos_venta_record.kml  # Muestra el contenido del archivo KML descargado
 
     - name: Subir el archivo KML actualizado
       run: |
