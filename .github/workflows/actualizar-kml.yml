@@ -1,0 +1,29 @@
+name: Actualizar KML diariamente
+
+on:
+  schedule:
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+
+jobs:
+  actualizar-kml:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Clonar el repositorio
+        uses: actions/checkout@v3
+
+      - name: Descargar el KML actualizado
+        run: |
+          curl -L "https://www.google.com/maps/d/u/0/kml?forcekml=1&mid=1NLx1CntjAmbgd7YzC11IKVSYmOzvaxg" -o puntos_venta_record.kml
+
+      - name: Configurar Git
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+
+      - name: Hacer commit si hay cambios
+        run: |
+          git add puntos_venta_record.kml
+          git diff --cached --quiet || git commit -m "🔄 Actualización diaria de puntos de venta RECORD cordoba"
+          git push
