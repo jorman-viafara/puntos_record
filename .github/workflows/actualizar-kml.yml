@@ -20,7 +20,7 @@ jobs:
 
     - name: Configurar remote URL con token
       run: |
-        git remote set-url origin https://x-access-token:${{ secrets.MY_GITHUB_TOKEN }}@github.com/${{ github.repository }}
+        git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
 
     - name: Descargar el archivo KML
       run: |
