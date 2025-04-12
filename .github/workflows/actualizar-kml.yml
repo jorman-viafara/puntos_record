@@ -1,30 +1,33 @@
-name: Actualizar KML diariamente
+name: Actualizar KML
 
 on:
   schedule:
-    - cron: "0 6 * * *"
-  workflow_dispatch:
+    - cron: '0 0 * * *'  # Esto ejecutará el flujo de trabajo todos los días a la medianoche
+  workflow_dispatch:  # Esto permite ejecutar el workflow manualmente
 
 jobs:
-  actualizar-kml:
+  update_kml:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Clonar el repositorio
-        uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      - name: Descargar el KML actualizado
-        run: |
-          curl -L "https://www.google.com/maps/d/u/0/kml?forcekml=1&mid=1NLx1CntjAmbgd7YzC11IKVSYmOzvaxg" -o puntos_venta_record.kml
+    - name: Configurar Git
+      run: |
+        git config user.name "jorman-viafara"
+        git config user.email "jorman.viafara@bluelinkbpo.com.co"
 
-      - name: Configurar Git
-        run: |
-          git config user.name "jorman-viafara"
-          git config user.email "jorman.viafara@bluelinkbpo.com.co"
-          git remote set-url origin https://x-access-token:${{ secrets.MY_GITHUB_TOKEN }}@github.com/${{ github.repository }}
+    - name: Configurar remote URL con token
+      run: |
+        git remote set-url origin https://x-access-token:${{ secrets.MY_GITHUB_TOKEN }}@github.com/${{ github.repository }}
 
-      - name: Hacer commit si hay cambios
-        run: |
-          git add puntos_venta_record.kml
-          git diff --cached --quiet || git commit -m "🔄 Actualización diaria de puntos de venta RECORD cordoba"
-          git push
+    - name: Descargar el archivo KML
+      run: |
+        curl -o puntos_venta_record.kml "https://www.google.com/maps/d/u/0/kml?forcekml=1&mid=1NLx1CntjAmbgd7YzC11IKVSYmOzvaxg"
+
+    - name: Subir el archivo KML actualizado
+      run: |
+        git add puntos_venta_record.kml
+        git commit -m "Actualizar archivo KML"
+        git push origin main
