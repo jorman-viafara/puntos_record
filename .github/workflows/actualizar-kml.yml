@@ -31,8 +31,13 @@ jobs:
       run: |
         cat puntos_venta_record.kml  # Muestra el contenido del archivo KML descargado
 
-    - name: Subir el archivo KML actualizado
+    - name: Subir el archivo KML actualizado (solo si hay cambios)
       run: |
         git add puntos_venta_record.kml
-        git commit -m "Actualizar archivo KML"
-        git push origin main
+        if git diff --cached --quiet; then
+          echo "No hay cambios en el archivo KML, no se hace commit."
+        else
+          git commit -m "Actualizar archivo KML"
+          git push origin main
+        fi
+
