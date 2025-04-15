@@ -17,7 +17,7 @@ jobs:
       run: |
         git config user.name "jorman-viafara"
         git config user.email "jorman.viafara@bluelinkbpo.com.co"
-        git remote set-url origin https://x-access-token:${{ GITHUB_TOKEN }}@github.com/${{ github.repository }}
+        git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
 
     - name: Descargar archivo KML
       run: |
