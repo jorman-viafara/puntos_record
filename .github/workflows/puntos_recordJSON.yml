@@ -1,0 +1,56 @@
+name: Actualizar KML y convertir a JSON
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Todos los días a la medianoche
+  workflow_dispatch:
+
+jobs:
+  update_kml:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout del repositorio
+      uses: actions/checkout@v3
+
+    - name: Configurar Git
+      run: |
+        git config user.name "jorman-viafara"
+        git config user.email "jorman.viafara@bluelinkbpo.com.co"
+        git remote set-url origin https://x-access-token:${{ GITHUB_TOKEN }}@github.com/${{ github.repository }}
+
+    - name: Descargar archivo KML
+      run: |
+        curl -L -o puntos_venta_record.kml "https://www.google.com/maps/d/u/0/kml?forcekml=1&mid=1NLx1CntjAmbgd7YzC11IKVSYmOzvaxg"
+
+    - name: Convertir KML a JSON
+      run: |
+        php -r '
+        $kml = simplexml_load_file("puntos_venta_record.kml");
+        $kml->registerXPathNamespace("kml", "http://www.opengis.net/kml/2.2");
+        $placemarks = $kml->xpath("//kml:Placemark");
+        $puntos = [];
+
+        foreach ($placemarks as $p) {
+            $nombre = (string) $p->name;
+            $coords = (string) $p->Point->coordinates;
+            list($lng, $lat) = array_map("floatval", explode(",", trim($coords)));
+            $puntos[] = [
+                "nombre" => $nombre,
+                "lat" => $lat,
+                "lng" => $lng
+            ];
+        }
+
+        file_put_contents("puntos_venta_record.json", json_encode($puntos, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        '
+
+    - name: Subir el archivo actualizado (solo si hay cambios)
+      run: |
+        git add puntos_venta_record.kml puntos_venta_record.json
+        if git diff --cached --quiet; then
+          echo "✅ No hay cambios. No se hace commit."
+        else
+          git commit -m "Actualizar archivo KML y JSON"
+          git push origin main
+        fi
